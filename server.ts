@@ -57,23 +57,44 @@ async function startServer() {
       ]
       `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [
-          {
-            inlineData: {
-              data: req.file.buffer.toString("base64"),
-              mimeType: "application/pdf",
+      let response;
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+              {
+                inlineData: {
+                  data: req.file.buffer.toString("base64"),
+                  mimeType: "application/pdf",
+                },
+              },
+              prompt,
+            ],
+            config: {
+              responseMimeType: "application/json",
             },
-          },
-          prompt,
-        ],
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
+          });
+          break; // if successful, break the retry loop
+        } catch (e: any) {
+          console.error(`Attempt failed (${3 - retries + 1}/3):`, e.message);
+          
+          if (e.message && e.message.includes("429")) {
+            throw new Error("Quota API Gemini (Free Tier) sedang habis. Silakan coba beberapa saat lagi.");
+          }
+          if (e.message && e.message.includes("token count exceeds")) {
+            throw new Error("Dokumen terlalu besar, melebihi batas maksimal yang dapat diproses oleh AI. Coba gunakan PDF dengan ukuran lebih kecil.");
+          }
+          
+          retries--;
+          if (retries === 0) throw e;
+          // Wait 2 seconds before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
 
-      if (!response.text) {
+      if (!response || !response.text) {
         throw new Error("Empty response from AI");
       }
       
