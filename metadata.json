@@ -1,0 +1,6 @@
+{
+  "name": "BankData Analytics",
+  "description": "Dashboard untuk tabulasi data, kalkulasi variabel penelitian (PSAK 71, Size, CAR, Total Akrual), dan ringkasan eksekutif laporan keuangan perbankan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
