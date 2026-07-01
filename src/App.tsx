@@ -5,7 +5,8 @@ import DataEntry from './components/DataEntry';
 import Visualizations from './components/Visualizations';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import Documentation from './components/Documentation';
-import { Database, BarChart3, FileText, Menu, X, Download, BookOpen, ExternalLink } from 'lucide-react';
+import SPSSResults from './components/SPSSResults';
+import { Database, BarChart3, FileText, Menu, X, Download, BookOpen, ExternalLink, FileBarChart2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -81,6 +82,7 @@ export default function App() {
     { id: 'summary', label: 'Ringkasan Eksekutif', icon: FileText },
     { id: 'input', label: 'Input Data (Master)', icon: Database },
     { id: 'visuals', label: 'Visualisasi Data', icon: BarChart3 },
+    { id: 'spss', label: 'Hasil SPSS', icon: FileBarChart2 },
     { id: 'docs', label: 'Dokumentasi Kalkulasi', icon: BookOpen },
   ] as const;
 
@@ -109,6 +111,14 @@ export default function App() {
             <p className="text-sm md:text-xl font-mono font-bold text-white">35 Banks / 210 Reports</p>
           </div>
           <div className="h-8 w-px bg-slate-700 hidden sm:block mx-2"></div>
+          <button 
+            onClick={handleExportPDF}
+            disabled={isExporting}
+            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-slate-600 disabled:opacity-50 whitespace-nowrap"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export PDF'}</span>
+          </button>
           <a 
             href="https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan/"
             target="_blank"
@@ -171,6 +181,7 @@ export default function App() {
             {activeTab === 'summary' && <ExecutiveSummary data={calculatedData} />}
             {activeTab === 'input' && <DataEntry data={data} onUpdate={handleDataUpdate} />}
             {activeTab === 'visuals' && <Visualizations data={calculatedData} />}
+            {activeTab === 'spss' && <SPSSResults data={calculatedData} />}
             {activeTab === 'docs' && <Documentation />}
           </div>
         </main>

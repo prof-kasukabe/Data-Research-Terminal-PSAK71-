@@ -81,6 +81,17 @@ async function startServer() {
           console.error(`Attempt failed (${3 - retries + 1}/3):`, e.message);
           
           if (e.message && e.message.includes("429")) {
+            const match = e.message.match(/retry in ([0-9.]+)s/);
+            if (match && match[1]) {
+               const delaySec = parseFloat(match[1]);
+               if (delaySec <= 65) { // If delay is reasonable, wait for it
+                 console.log(`Rate limited. Waiting for ${delaySec}s before retrying...`);
+                 await new Promise(resolve => setTimeout(resolve, (delaySec + 1) * 1000));
+                 retries--;
+                 if (retries === 0) throw new Error("Quota API Gemini (Free Tier) sedang habis. Silakan coba beberapa saat lagi.");
+                 continue;
+               }
+            }
             throw new Error("Quota API Gemini (Free Tier) sedang habis. Silakan coba beberapa saat lagi.");
           }
           if (e.message && e.message.includes("token count exceeds")) {
